@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Server Index</title>
+  <link rel="shortcut icon" type="image/x-icon" href="../static/favicon.ico" />
+  <link rel="stylesheet" href="../static/css/swiper/swiper-bundle.min.css" />
+  <style>
+    .right-top-box {
+      margin: 0 auto;
+      height: 300px;
+      width: 500px;
+      /* border: 1px solid orange; */
+    }
+
+    .swiper {
+      width: 500px;
+      height: 300px;
+    }
+  </style>
+</head>
+
+<body style="background-color: #001847">
+  <div>
+    <div class="right-top-box" style="color: white;">
+      <div class="swiper">
+        <div class="swiper-wrapper">
+          <!-- <div class="swiper-slide" id="chart-rt-0" data-swiper-autoplay="500">First</div> -->
+          <div class="swiper-slide" id="chart-rt-1" data-swiper-autoplay="3000"></div>
+          <div class="swiper-slide" id="chart-rt-2" data-swiper-autoplay="3000"></div>
+          <div class="swiper-slide" id="chart-rt-3" data-swiper-autoplay="3000"></div>
+          <div class="swiper-slide" id="chart-rt-4" data-swiper-autoplay="3000"></div>
+          <div class="swiper-slide" id="chart-rt-5" data-swiper-autoplay="3000"></div>
+          <!-- <div class="swiper-slide" id="chart-rt-6" data-swiper-autoplay="500">Last</div> -->
+        </div>
+        <!-- 如果需要分页器 -->
+        <div class="swiper-pagination"></div>
+        <!-- 如果需要导航按钮 -->
+        <!-- <div class="swiper-button-prev"></div>
+          <div class="swiper-button-next"></div> -->
+        <!-- 如果需要滚动条 -->
+        <!-- <div class="swiper-scrollbar"></div> -->
+      </div>
+    </div>
+  </div>
+</body>
+<script src="../static/js/charts/echarts.min.js"></script>
+<script src="../static/js/swiper/swiper-bundle.min.js"></script>
+<script>
+  let chart_rts = []
+  let chart_rt_data = []
+
+  init_chart_rt()
+  requset_chart_rt()
+
+  // 模拟发送请求，或者10分钟访问刷新一下数据
+  setTimeout(() => {
+  }, 3 * 1000)
+
+  let main_swiper = new Swiper('.swiper', {
+    // direction: 'vertical', // 垂直切换选项
+    loop:  false, // 循环模式选项
+    effect: 'fade',
+    fadeEffect: {
+      crossFade: true,
+    },
+    // 自动轮播
+    autoplay: {
+      delay: 3000, // 轮播时间
+      stopOnLastSlide: false, // 是否到最后一个之后暂停轮播
+      disableOnInteraction: true
+    },
+    // 如果需要分页器
+    pagination: {
+      el: '.swiper-pagination',
+      clickable: true
+    },
+    // 如果需要前进后退按钮
+    navigation: {
+      nextEl: '.swiper-button-next',
+      prevEl: '.swiper-button-prev',
+    },
+    // 如果需要滚动条
+    scrollbar: {
+      el: '.swiper-scrollbar',
+    },
+  })
+
+  main_swiper.autoplay.stop();
+
+  // 请求右上5图接口
+  function requset_chart_rt() {
+    fetch('../static/js/data/chart_rt_response.json')
+      .then((res) => {
+        return res.json()
+      })
+      .then((data) => {
+        chart_rt_data = data
+        render_chart_rt()
+      })
+  }
+
+  // 初始化echart实例，如果数量与接口响应数据数量不匹配，那么图表会空白
+  function init_chart_rt() {
+    // let doms = document.getElementsByClassName('chart-rt')
+    // for (let i = 0; i< doms.length; i++) {
+    //   if (i !== 0 && i !== doms.length - 1) {
+    //     chart_rts.push(
+    //       echarts.init(doms[i]) 
+    //     ) 
+    //   }
+    // }
+    chart_rts = [
+      echarts.init(document.getElementById('chart-rt-1')),
+      echarts.init(document.getElementById('chart-rt-2')),
+      echarts.init(document.getElementById('chart-rt-3')),
+      echarts.init(document.getElementById('chart-rt-4')),
+      echarts.init(document.getElementById('chart-rt-5')),
+    ]
+    // chart_rts.unshift(undefined)
+    // chart_rts.push(undefined)
+  }
+
+  // 渲染图表数据，需在请求到数据后调用
+  function render_chart_rt() {
+    if (chart_rt_data && chart_rt_data.length > 0) {
+      chart_rt_data.forEach((d, i) => {
+        let chart_instance = chart_rts[i]
+        if (chart_instance) {
+          chart_instance.clear()
+          // 加工数据，生成图表配置内容
+          let opts = get_chart_rt_options(d)
+          if (opts) chart_instance.setOption(opts, true)
+        }
+        
+      })
+      main_swiper.autoplay.start()
+    }
+  }
+
+  /**
+   * 获取图表数据配置项
+   *  
+    [
+      {
+        "title": "图表1",
+        "upper": 0.822809,
+        "datas": [ 0.12 ],
+        "avg": 0.2856,
+        "lower": -0.251609
+      },
+    ]
+   * 
+   */
+  function get_chart_rt_options(d) {
+    let color = '#fff'
+    let lineColor = '#33CC99'
+    let itemColor = '#99BBFF00'
+    let fontWeight = '500'
+    const { upper, lower, avg, datas, dataX, title } = d
+    let handleMarkLine = ({ name = '', color = '', value = 0 }) => {
+      let line = {
+        name,
+        type: 'line',
+        markLine: {
+          symbol: '',
+          lineStyle: {
+            color,
+            opacity: 0.8,
+            type: 'solid',
+            width: 3,
+          },
+          label: { color, fontWeight, formatter: `${name}={c}` },
+          data: [{ yAxis: value }],
+        },
+      }
+      return line
+    }
+    let markLines = [
+      handleMarkLine({ name: '上限', color: '#66FFFF', value: upper }), // A上线颜色
+      handleMarkLine({ name: '下限', color: '#FF6666', value: lower }), // A下线颜色
+      handleMarkLine({ name: '均值', color: '#FF9933', value: avg }),
+    ]
+    let option = {
+      title: {
+        text: title,
+        x: 'center',
+        textStyle: { color, fontWeight, fontSize: 16 },
+      },
+      legend: {
+        top: '10%',
+        itemWidth: 30,
+        itemHeight: 0,
+        textStyle: {
+          fontSize: 16
+        },
+        lineStyle: {
+          width: 3
+        },
+        textStyle: { color, fontWeight, fontSize: 12 },
+      },
+      grid: {
+        top: 50,
+        left: '3%',
+        right: '15%',
+        bottom: '8%',
+        containLabel: true,
+      },
+      tooltip: {
+        trigger: 'axis',
+      },
+      xAxis: {
+        type: 'category',
+        boundaryGap: false,
+        axisLabel: {
+          show: true,
+          onZero: false,
+          color: '#aaa',
+          lineStyle: {
+            width: 1,
+          },
+        },
+        axisTick: {
+          show: false,
+        },
+      },
+      yAxis: {
+        type: 'value',
+        name: '值',
+        nameTextStyle: {
+          color,
+          fontSize: 13,
+        },
+        // nameGap: 40,
+        axisLine: {
+          show: true,
+          onZero: false,
+          lineStyle: {
+            width: 1,
+          },
+        },
+        axisLabel: {
+          color: '#aaa',
+          fontSize: 10,
+        },
+        axisTick: {
+          show: true,
+          lineStyle: {
+            width: 2,
+          },
+        },
+        splitLine: {
+          lineStyle: {
+            width: 0,
+          },
+        },
+        scale: true,
+        interval: 0.2,
+        min: function (val) {
+          return (lower - avg / 2).toFixed(1)
+        },
+        max: function (val) {
+          return (upper + avg / 2).toFixed(1)
+        }
+      },
+      series: [
+        ...markLines,
+        {
+          name: '元素值',
+          type: 'line',
+          z: 10,
+          zlevel: 10,
+          smooth: true,
+          symbol: 'circle',
+          symbolSize: 5,
+          showSymbol: true,
+          showAllSymbol: true,
+          lineStyle: {
+            color: lineColor,
+            wdith: 8,
+          },
+          areaStyle: {
+            opacity: 0.6,
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              {
+                offset: 0,
+                color: '#33CC99'
+              },
+              {
+                offset: 1,
+                color: '#33CC9910'
+              }
+            ])
+          },
+          itemStyle: { color: itemColor },
+          label: { color, fontWeight, fontSize: 12 },
+          data: datas,
+        },
+      ],
+    }
+    return option
+  }
+</script>
+
+</html>
