@@ -46,3 +46,43 @@ if ubuntu :
 
 - `pip3 install aiohttp`
 - `python3 client.py`
+
+### build release
+
+```sh
+cargo build --release
+
+nohup ./target/release/actix-tom > actix-tom.out 2>&1 &
+```
+
+### cross compiling
+
+```sh
+rustup target list
+rustup target add x86_64-unknown-linux-musl
+```
+
+.cargo/config
+
+```
+[target.x86_64-unknown-linux-musl] 
+linker = "x86_64-linux-musl-gcc"
+```
+
+Maybe need to update openssl and musl-tools
+
+```sh
+# update openssl
+brew update
+brew install openssl
+brew link --force openssl
+
+brew install FiloSottile/musl-cross/musl-cross
+```
+
+Cross-compiling Rust From Mac to Linux
+
+```sh
+TARGET_CC=x86_64-linux-musl-gcc cargo build --release --target x86_64-unknown-linux-musl
+CC_x86_64_unknown_linux_musl="x86_64-linux-musl-gcc" cargo build --release --target=x86_64-unknown-linux-musl
+```
