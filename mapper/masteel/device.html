@@ -31,7 +31,7 @@
     </where>
     <choose>
       <when test="order_by != ''">
-        ` ORDER BY fd_eqarea asc, fd_rowid asc, ${order_by} `
+        ` ORDER BY ${order_by} `
       </when>
       <otherwise> ` ORDER BY fd_eqarea asc, fd_rowid asc ` </otherwise>
     </choose>

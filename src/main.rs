@@ -4,6 +4,7 @@ use actix_tom::{
     controller::{masteel, weather},
     db, error, rb, CONFIG,
 };
+use actix_cors::Cors;
 use actix_web::{
     get, guard, middleware, post, web, App, HttpResponse, HttpServer, Responder, Result,
 };
@@ -57,17 +58,17 @@ async fn user_detail_get(path: web::Path<(String,)>) -> HttpResponse {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     // env logger 初始化
-    env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
+    // env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
     // fast logger 初始化
-    // app_log::init_logger();
+    app_log::init_logger();
 
     #[cfg(debug_assertions)]
     {
         let local_ip = local_ipaddress::get().unwrap();
         log::info!("Starting Http Server :");
-        log::info!("Local:    http://localhost:{}", CONFIG.PORT);
-        log::info!("Network:  http://{}:{}", local_ip, CONFIG.PORT);
+        log::info!("Local:    http://localhost:{}", CONFIG.SERVER.PORT);
+        log::info!("Network:  http://{}:{}", local_ip, CONFIG.SERVER.PORT);
     }
 
     let rb_data = web::Data::new(rb::init_mssql_pool());
@@ -92,17 +93,19 @@ async fn main() -> std::io::Result<()> {
 
         App::new()
             .wrap(middleware::Compress::default())
+            // 日志
             .wrap(middleware::Logger::default())
+            // CORS 中间件
+            .wrap(Cors::permissive())
             .app_data(rb_data.clone())
             .app_data(web::Data::new(tera))
             .app_data(web::JsonConfig::default().limit(4096))
             .app_data(web::Data::new(AppState {
-                app_name: String::from("Actix Tom"),
-                app_version: String::from("v0.1.0"),
+                app_name: CONFIG.APP.NAME.clone(),
+                app_version: CONFIG.APP.VERSION.clone(),
             }))
             // register favicon
             .service(favicon)
-            .service(web::scope("/home").route("/index.html", web::get().to(home_index)))
             .service(index)
             .service(info)
             .service(echo)
@@ -123,7 +126,7 @@ async fn main() -> std::io::Result<()> {
             .service(web::scope("").wrap(error::index::error_handlers()))
     })
     // .bind(("127.0.0.1", 8086))?
-    .bind(format!("{}:{}", CONFIG.BIND_HOST, CONFIG.PORT))?
+    .bind(format!("{}:{}", CONFIG.SERVER.HOST, CONFIG.SERVER.PORT))?
     .workers(2)
     .run()
     .await

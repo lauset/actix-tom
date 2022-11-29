@@ -9,7 +9,7 @@ pub fn init_logger() {
         Config::new()
             .console()
             .file_split(
-                "target/logs/",
+                "logs/",
                 LogSize::MB(1),
                 RollingType::All,
                 LogPacker {},

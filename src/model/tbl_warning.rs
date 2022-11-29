@@ -1,11 +1,7 @@
 use rbatis::rbdc::datetime::FastDateTime;
 use rbatis::Rbatis;
-use rbatis::{crud, impl_select};
+use rbatis::{Error, crud, impl_select};
 use serde::{Deserialize, Serialize};
-use sqlx::{
-    mssql::{MssqlPool, MssqlRow},
-    Row,
-};
 
 #[derive(Clone, Debug, serde::Deserialize, serde::Serialize)]
 pub struct TblWarningQuery {
@@ -50,44 +46,8 @@ pub struct TblWarning {
 impl_select!(TblWarning{select_device_by_eqarea(name: &str) => "`where fd_eqarea = #{name}`"});
 
 impl TblWarning {
-    pub async fn all(rb: &Rbatis) -> Result<Vec<TblWarning>, sqlx::Error> {
+    pub async fn all(rb: &Rbatis) -> Result<Vec<TblWarning>, Error> {
         let mut res: Vec<TblWarning> = Vec::with_capacity(1);
         Ok(res)
-    }
-
-    pub async fn insert_tt(todo: NewTask, connection: &MssqlPool) -> Result<(), sqlx::Error> {
-        // sqlx::query!(
-        //     r#"
-        //     "#,
-        //     todo.description,
-        // )
-        // .execute(connection)
-        // .await?;
-
-        Ok(())
-    }
-
-    pub async fn toggle_with_id(id: i32, connection: &MssqlPool) -> Result<(), sqlx::Error> {
-        // sqlx::query!(
-        //     r#"
-        //     "#,
-        //     id
-        // )
-        // .execute(connection)
-        // .await?;
-
-        Ok(())
-    }
-
-    pub async fn delete_with_id(id: i32, connection: &MssqlPool) -> Result<(), sqlx::Error> {
-        // sqlx::query!(
-        //     r#"
-        //     "#,
-        //     id
-        // )
-        // .execute(connection)
-        // .await?;
-
-        Ok(())
     }
 }

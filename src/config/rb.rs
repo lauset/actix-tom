@@ -6,8 +6,14 @@ use rbdc_mysql::driver::MysqlDriver;
 pub fn init_mysql_pool() -> Rbatis {
     #[cfg(debug_assertions)]
     let mysql_url = {
-        debug!("rbatis pool init ({})...", CONFIG.MYSQL_URL);
-        CONFIG.MYSQL_URL.as_str()
+        debug!("rbatis pool init ({})...", CONFIG.DATABASE.MYSQL_URL);
+        CONFIG.DATABASE.MYSQL_URL.as_str()
+    };
+
+    #[cfg(not(debug_assertions))]
+    let mysql_url = {
+        debug!("rbatis pool init ({})...", CONFIG.DATABASE.MYSQL_URL);
+        CONFIG.DATABASE.MYSQL_URL.as_str()
     };
 
     let rbatis = Rbatis::new();
@@ -21,8 +27,14 @@ pub fn init_mysql_pool() -> Rbatis {
 pub fn init_mssql_pool() -> Rbatis {
     #[cfg(debug_assertions)]
     let mssql_url = {
-        debug!("rbatis pool init ({})...", CONFIG.MSSQL_URL);
-        CONFIG.MSSQL_URL.as_str()
+        debug!("rbatis pool init ({})...", CONFIG.DATABASE.MSSQL_URL);
+        CONFIG.DATABASE.MSSQL_URL.as_str()
+    };
+
+    #[cfg(not(debug_assertions))]
+    let mssql_url = {
+        debug!("rbatis pool init ({})...", CONFIG.DATABASE.MSSQL_URL);
+        CONFIG.DATABASE.MSSQL_URL.as_str()
     };
 
     // #[cfg(not(debug_assertions))]
