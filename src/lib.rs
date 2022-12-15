@@ -10,12 +10,14 @@ extern crate log;
 extern crate serde_json;
 
 pub mod controller {
+    pub mod example;
     pub mod masteel;
     pub mod weather;
 }
 
 pub mod error {
     pub mod index;
+    pub mod service;
 }
 
 pub mod model;
@@ -26,6 +28,7 @@ pub mod service {
 }
 
 pub mod config;
+pub mod constants;
 pub mod db;
 
 pub use config::log as app_log;

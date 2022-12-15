@@ -1,6 +1,6 @@
 use rbatis::rbdc::datetime::FastDateTime;
 use rbatis::Rbatis;
-use rbatis::{Error, crud, impl_select};
+use rbatis::{crud, impl_select, Error};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, serde::Deserialize, serde::Serialize)]
@@ -26,6 +26,7 @@ pub struct TblWarning {
     pub fd_sid: Option<String>,
     pub fd_ruleid: Option<String>,
     pub fd_eqarea: Option<String>,
+    pub fd_eqgroup: Option<String>,
     pub fd_eqname: Option<String>,
     pub fd_wnname: Option<String>,
     pub fd_wndes: Option<String>,
@@ -36,6 +37,7 @@ pub struct TblWarning {
     pub fd_remarks: Option<String>,
     pub fd_ttid: Option<String>,
     // custom field
+    pub fd_status_text: Option<String>,
     pub fd_sec: Option<u32>,
     pub fd_min: Option<u32>,
     pub fd_hour: Option<u32>,

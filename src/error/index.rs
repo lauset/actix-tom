@@ -14,7 +14,9 @@ pub fn error_handlers() -> ErrorHandlers<BoxBody> {
 }
 
 // Error handler for a 404 Page not found error.
-fn not_found<B>(res: ServiceResponse<B>) -> Result<ErrorHandlerResponse<BoxBody>> {
+fn not_found<B>(
+    res: ServiceResponse<B>,
+) -> Result<ErrorHandlerResponse<BoxBody>> {
     let response = get_error_response(&res, "Page not found");
     Ok(ErrorHandlerResponse::Response(ServiceResponse::new(
         res.into_parts().0,
@@ -23,7 +25,10 @@ fn not_found<B>(res: ServiceResponse<B>) -> Result<ErrorHandlerResponse<BoxBody>
 }
 
 // Generic error handler.
-fn get_error_response<B>(res: &ServiceResponse<B>, error: &str) -> HttpResponse {
+fn get_error_response<B>(
+    res: &ServiceResponse<B>,
+    error: &str,
+) -> HttpResponse {
     let request = res.request();
 
     // Provide a fallback to a simple plain text response in case an error occurs during the

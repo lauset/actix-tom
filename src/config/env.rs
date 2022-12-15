@@ -2,7 +2,7 @@
 pub struct EnvConfig {
     pub APP: AppConfig,
     pub SERVER: ServerConfig,
-    pub DATABASE: DatabaseConfig
+    pub DATABASE: DatabaseConfig,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -27,8 +27,8 @@ pub struct DatabaseConfig {
 impl Default for EnvConfig {
     fn default() -> Self {
         let yml_data = include_str!("../../env.yaml");
-        let result: EnvConfig =
-            serde_yaml::from_str(yml_data).expect("load env.yaml config file fail");
+        let result: EnvConfig = serde_yaml::from_str(yml_data)
+            .expect("load env.yaml config file fail");
         result
     }
 }
