@@ -1,0 +1,52 @@
+.cycle-page {
+  width: 100vw;
+  height: 100vh;
+  padding: 20px;
+  display: flex;
+}
+.cycle-page .cycle-chart {
+  width: 400px;
+  height: 200px;
+}
+.cycle-page .cycle-app {
+  padding: 20px;
+}
+.cycle-page .cycle-app table, .cycle-page .cycle-app td {
+  border: 1.5px solid #5e6a96;
+}
+.cycle-page .cycle-app .cycle-table {
+  width: 400px;
+  height: 150px;
+  border-collapse: collapse;
+}
+.cycle-page .cycle-app .cycle-table .cycle-tr {
+  width: 100%;
+  height: 25%;
+  display: flex;
+  text-align: center;
+}
+.cycle-page .cycle-app .cycle-table .cycle-tr .cycle-td-label {
+  display: inline-block;
+  flex: 1;
+  width: 20%;
+  font-weight: 600;
+}
+.cycle-page .cycle-app .cycle-table .cycle-tr .cycle-td-value {
+  display: inline-block;
+  flex: none;
+  width: 80%;
+}
+.cycle-page .cycle-app .cycle-table .cycle-tr .cycle-td-value .cycle-td-progress {
+  width: 100%;
+  max-height: 40px;
+  border: 1px solid gray;
+  border-radius: 5px;
+  transition: width 0.5s;
+  background: linear-gradient(to right, #75a1ff, #e5eeff);
+}
+.cycle-page .cycle-app .cycle-table .cycle-tr .cycle-td-value .cycle-td-progress:hover {
+  border: 1px solid black;
+  background: linear-gradient(to right, #4983ff, #c3d8ff);
+}
+
+/*# sourceMappingURL=cycle.css.map */

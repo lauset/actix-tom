@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>周期</title>
+    <script src="/static/js/vue/petite-vue.iife.js"></script>
+    <script src="/static/js/charts/echarts.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/cycle/cycle.css" />
+  </head>
+  <body>
+    <div class="cycle-page">
+      <!-- 左侧柱形图 -->
+      <div id="cycle-chart" class="cycle-chart"></div>
+      <!-- 中间表格 -->
+      <div
+        id="app1"
+        class="cycle-app"
+        v-scope="app1({})"
+        @vue:mounted="mounted"
+        @vue:unmounted="unMounted">
+        <table class="cycle-table">
+          <tr
+            class="cycle-tr"
+            v-for="(t, i) in tableData"
+            v-effect="changeStyle($el, t.value)">
+            <td class="cycle-td-label">{{t.label}}</td>
+            <td class="cycle-td-value">
+              <div class="cycle-td-progress">{{t.value||0}} %</div>
+            </td>
+          </tr>
+        </table>
+        <br />
+        <button @click="queryData">Test</button>
+      </div>
+      <!-- 右侧柱形图 -->
+      <div id="cycle-chart2" class="cycle-chart"></div>
+    </div>
+    <script>
+      // 获取1-100随机数
+      function num(add = 0) {
+        return (Math.floor(Math.random() * 99) + Math.random() + add).toFixed(1)
+      }
+      // 模拟请求表格数据
+      function requestTableApi() {
+        return new Promise(function (resolve, reject) {
+          resolve([
+            { label: '炉前', value: num() },
+            { label: '钢包', value: num() },
+            { label: '糟练', value: num() },
+            { label: '平均', value: num() },
+          ])
+        })
+      }
+      // 模拟请求柱形图数据
+      function requestBarApi() {
+        return new Promise(function (resolve, reject) {
+          resolve([
+            { label: '炉前', value: num(100) },
+            { label: '钢包', value: num(100) },
+            { label: '糟练', value: num(100) },
+            { label: '平均', value: num(100) },
+          ])
+        })
+      }
+      // 模拟请求柱形图2数据
+      function requestBar2Api() {
+        return new Promise(function (resolve, reject) {
+          resolve([
+            { label: 'N值', value: num() },
+            { label: '热轧', value: num() },
+            { label: '拉伸', value: num() },
+            { label: 'R值', value: num() },
+          ])
+        })
+      }
+      // 根据数据渲染图表配置
+      function renderBar(data) {
+        let c = echarts.init(document.getElementById('cycle-chart'))
+        if (c) {
+          c.clear()
+          // 加工数据，生成图表配置内容
+          let opts = get_bar_options(data)
+          if (opts) c.setOption(opts, true)
+        }
+      }
+      function renderBar2(data) {
+        let c = echarts.init(document.getElementById('cycle-chart2'))
+        if (c) {
+          c.clear()
+          // 加工数据，生成图表配置内容
+          let opts = get_bar2_options(data)
+          if (opts) c.setOption(opts, true)
+        }
+      }
+      // vue实例，便于操作表格
+      function app1(props) {
+        return {
+          tableHeight: 150, // 表格高度，根据高度和数量计算单行高度
+          tableData: props.tableData || [], // 存表格数据
+          chartData: props.chartData || [], // 存柱形图1数据
+          chart2Data: props.chart2Data || [], // 存柱形图2数据
+          // 改变tr下dom样式
+          changeStyle(el, val) {
+            if (!this.tableData) return
+            let size = this.tableData.length
+            let w = `${val}%` // 进度条宽度
+            let h = `${this.tableHeight / size}px` // td高度
+            let hp = `${this.tableHeight / size - 2}px` // 进度条高度
+            let labelDom = el.getElementsByClassName('cycle-td-label')[0]
+            let valueDom = el.getElementsByClassName('cycle-td-value')[0]
+            let progressDom = el.getElementsByClassName('cycle-td-progress')[0]
+            let doms = [labelDom, valueDom, progressDom]
+            // 设置进度条宽度
+            doms.forEach((d) => {
+              if (d) {
+                d.setAttribute('style', `height:${h};line-height:${h};`)
+                if (d.getAttribute('class') === 'cycle-td-progress') {
+                  d.setAttribute(
+                    'style',
+                    `width:${w};height:${hp};line-height:${h};`
+                  )
+                }
+              }
+            })
+          },
+          queryData() {
+            // 模拟查询数据
+            requestTableApi().then((res) => {
+              this.tableData = res
+            })
+            requestBarApi().then((res) => {
+              this.chartData = res
+              renderBar(this.chartData)
+            })
+            requestBar2Api().then((res) => {
+              this.chartData2 = res
+              renderBar2(this.chartData2)
+            })
+          },
+          mounted() {
+            // 模拟请求图表数据与表格数据
+            requestTableApi().then((res) => {
+              this.tableData = res
+            })
+            requestBarApi().then((res) => {
+              this.chartData = res
+              renderBar(this.chartData)
+            })
+            requestBar2Api().then((res) => {
+              this.chartData2 = res
+              renderBar2(this.chartData2)
+            })
+          },
+          unmounted() {
+            console.log('unMounted')
+          },
+        }
+      }
+
+      // vue挂载
+      PetiteVue.createApp({ app1 }).mount()
+
+      // 获取左侧柱形图 echarts options
+      function get_bar_options(data) {
+        if (!data) return
+        data.reverse()
+        let dataVal = data.map((d) => [d.value, d.label])
+        // dataVal = [
+        //   [89.3, '炉前'],
+        //   [57.1, '钢包'],
+        //   [74.4, '糟炼'],
+        //   [50.1, '平均'],
+        // ]
+        let option = {
+          dataset: {
+            source: [['value', 'label'], ...dataVal],
+          },
+          grid: {
+            containLabel: true,
+            top: '3%',
+            bottom: '3%',
+            left: '6%',
+            right: '3%',
+          },
+          xAxis: {
+            name: 'value',
+            position: 'top',
+            scale: true,
+            axisLine: {
+              show: true,
+              lineStyle: {
+                width: 2,
+                opacity: 0.8,
+              },
+            },
+            axisTick: {
+              show: true,
+            },
+            axisLabel: {
+              fontSize: 14,
+            },
+            min: function (val) {
+              if (val.min > 10) {
+                return (val.min - 10).toFixed(0)
+              }
+              return val.min
+            },
+          },
+          yAxis: {
+            type: 'category',
+            axisLabel: {
+              textStyle: {
+                fontSize: 16,
+              },
+            },
+          },
+          series: [
+            {
+              type: 'bar',
+              barMaxWidth: 40,
+              label: {
+                show: true,
+                align: 'center',
+                fontSize: 14,
+              },
+              itemStyle: {
+                // color: '#bbb',
+                color: function (p) {
+                  if (p.name === '平均') return 'orange'
+                  else return '#bbb'
+                },
+              },
+              encode: {
+                x: 'value',
+                y: 'label',
+              },
+            },
+          ],
+        }
+        return option
+      }
+
+      // 获取右侧柱形图
+      function get_bar2_options(data) {
+        if (!data) return
+        let datax = data.map((d) => d.label)
+        let data1 = data.map((d) => d.value)
+        return {
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'none' },
+            formatter(params) {
+              return `${params[0].name}: ${params[0].value}`
+            },
+          },
+          grid: {
+            top: '6%',
+            bottom: '3%',
+            left: '6%',
+            right: '3%',
+            containLabel: true,
+          },
+          xAxis: {
+            data: datax,
+            axisTick: { show: false },
+            axisLine: { show: false },
+            axisLabel: {
+              fontSize: '16',
+              align: 'center',
+              interval: 0,
+            },
+          },
+          yAxis: [
+            {
+              type: 'value',
+              name: '超限率(%)',
+              nameLocation: 'center',
+              position: 'left',
+              nameTextStyle: {
+                fontSize: '16',
+                color: 'white',
+                padding: [3, 0, 35, 0],
+              },
+              nameGap: 0,
+              splitLine: {
+                show: true,
+                lineStyle: { color: ['#aaa', '#ddd'], opacity: 0.2 },
+              },
+              axisTick: { show: false },
+              axisLine: { show: false, onZero: false },
+              axisLabel: {
+                show: true,
+                fontSize: 15,
+                margin: 0,
+                formatter(value, index) {
+                  return (res = `${value}%`)
+                },
+              },
+            },
+            {
+              type: 'value',
+              name: '超限数',
+              offset: 0,
+              nameLocation: 'center',
+              position: 'right',
+              nameTextStyle: {
+                color: 'white',
+                fontSize: '16px',
+                padding: [20, 0, 0, 0],
+              },
+              splitLine: { show: false },
+              axisTick: { show: false },
+              axisLine: { show: false, onZero: false },
+              axisLabel: {
+                padding: [0, 50, 0, 0],
+                show: true,
+                fontSize: '16px',
+                margin: 0,
+                formatter: ' {value}',
+                textStyle: { align: 'left' },
+              },
+            },
+          ],
+          series: [
+            {
+              name: 'bar1',
+              type: 'pictorialBar',
+              yAxisIndex: 0,
+              barGap: '-50%',
+              symbol:
+                'path://M0,10 L10,10 C5.5,10 5.5,5 5,0 C4.5,5 4.5,10 0,10 z',
+              barWidth: 35,
+              label: {
+                show: true,
+                position: 'top',
+                fontSize: 13,
+                fontWeight: 'bolder',
+                formatter: '{c} %',
+              },
+              itemStyle: {
+                opacity: 1,
+                color: '#e06666',
+              },
+              emphasis: { itemStyle: { opacity: 1 } },
+              data: data1,
+              z: 10,
+            },
+          ],
+        }
+      }
+    </script>
+  </body>
+</html>

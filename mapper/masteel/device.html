@@ -1,5 +1,46 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "https://raw.githubusercontent.com/rbatis/rbatis/master/rbatis-codegen/mybatis-3-mapper.dtd">
 <mapper>
+  <sql id="col1">
+    ` SELECT
+      ROW_NUMBER() OVER(
+    ORDER BY
+      fd_eqarea,
+      fd_rowid) as fd_no,
+      fd_rowid,
+      fd_sid,
+      fd_ruleid,
+      fd_eqarea,
+      fd_eqgroup,
+      fd_eqname,
+      fd_wnname,
+      fd_wndes,
+      fd_wnlevel,
+      fd_starttime,
+      fd_endtime,
+      fd_status,
+      CASE
+        when fd_status = '关闭'
+        then '已恢复'
+        when fd_status = '有效' then '恢复中'
+        when fd_status = '作废'
+        then '已作废'
+        else ''
+      end fd_status_text,
+      fd_remarks,
+      DATEDIFF(second,
+        fd_starttime , isnull(fd_endtime, GETDATE())) as fd_sec,
+      DATEDIFF(minute,
+        fd_starttime , isnull(fd_endtime, GETDATE())) as fd_min,
+      DATEDIFF(hour,
+        fd_starttime , isnull(fd_endtime, GETDATE())) as fd_hour,
+      CONCAT(
+        DATEDIFF(second, fd_starttime , isnull(fd_endtime, GETDATE())) / 3600, '时',
+        DATEDIFF(second, fd_starttime , isnull(fd_endtime, GETDATE())) / 60 -
+        ((DATEDIFF(second, fd_starttime , isnull(fd_endtime, GETDATE())) / 3600) *
+        60), '分' ) as fd_time
+    FROM
+      sbgz.dbo.tbl_warning_report `
+  </sql>
   <select id="select_list">
     ` SELECT ROW_NUMBER() OVER( ORDER BY fd_eqarea, fd_rowid) as fd_no,
     fd_rowid, fd_sid, fd_ruleid, fd_eqarea, fd_eqgroup, fd_eqname, fd_wnname,
@@ -27,6 +68,30 @@
       <if test="time_min >= 0">
         ` and DATEDIFF(minute, fd_starttime , isnull(fd_endtime, GETDATE())) >=
         #{time_min} `
+      </if>
+    </where>
+    <choose>
+      <when test="order_by != ''">
+        ` ORDER BY ${order_by} `
+      </when>
+      <otherwise> ` ORDER BY fd_eqarea asc, fd_rowid asc ` </otherwise>
+    </choose>
+  </select>
+  <select id="select_report_list">
+    <include refid="col1"></include>
+    <where>
+      ` fd_wnlevel >= #{level} `
+      <if test="eq_area != ''"> ` and fd_eqarea like '${eq_area}%' ` </if>
+      <if test="eq_name != ''"> ` and fd_eqname like '${eq_name}%' ` </if>
+      <if test="status != ''"> ` and fd_status_text = #{status} ` </if>
+      <if test="start_time != '1970-01-01 00:00:00'">
+        ` and fd_starttime >= #{start_time} `
+      </if>
+      <if test="end_time != '1970-01-01 00:00:00' && end_time > start_time">
+        ` and fd_starttime < #{end_time} `
+      </if>
+      <if test="time_min >= 0">
+        ` and DATEDIFF(minute, fd_starttime , isnull(fd_endtime, GETDATE())) >= #{time_min} `
       </if>
     </where>
     <choose>
