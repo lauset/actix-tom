@@ -10,6 +10,7 @@ actix-web = "4"
 actix-http = "^3.2"
 actix-cors = "^0.6"
 actix-files = "0.6.0"
+actix-settings = "0.6.0"
 
 async-stream = "0.3"
 dotenv = "0.15"
@@ -37,6 +38,10 @@ fancy-regex = "^0.10"
 
 openssl = { version = "0.10", features = ["vendored"] }
 
+[dev-dependencies]
+
 [profile.dev]
 
 [profile.release]
+# Enables line numbers in Sentry
+debug = 1

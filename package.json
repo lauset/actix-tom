@@ -1,0 +1,24 @@
+{
+  "name": "actix-tom",
+  "version": "1.0.0",
+  "description": "Mssql/Mysql Http Server for Actix Web",
+  "main": "index.js",
+  "scripts": {
+    "dev": "cargo run",
+    "fmt": "cargo fmt",
+    "build": "cargo build --release",
+    "serve": "nohup ./target/release/actix-tom > actix-tom.out 2>&1 &",
+    "build:linux": "CC_x86_64_unknown_linux_musl=\"x86_64-linux-musl-gcc\" cargo build --release --target=x86_64-unknown-linux-musl",
+    "release:linux": "npm run build:linux && npm run copy:linux",
+    "copy:linux": "node build.js linux"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lauset/actix-tom.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lauset/actix-tom/issues"
+  },
+  "homepage": "https://github.com/lauset/actix-tom#readme"
+}
